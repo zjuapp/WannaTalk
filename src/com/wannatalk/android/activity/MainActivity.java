@@ -1,4 +1,6 @@
-package com.wannatalk;
+package com.wannatalk.android.activity;
+
+import com.wannatalk.R;
 
 import android.os.Bundle;
 import android.app.Activity;
