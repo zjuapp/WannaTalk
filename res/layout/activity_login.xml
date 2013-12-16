@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#EEEEFF" >
+
+    <RelativeLayout
+        android:id="@+id/re_head"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dip" >
+
+        <ImageView
+            android:id="@+id/loginhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/faceback" />
+
+        <ImageView
+            android:id="@+id/loginhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/log_face" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/re_head"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dip"
+        android:background="@drawable/shurukuang" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="帐号:"
+            android:textColor="#000000" />
+
+        <EditText
+            android:id="@+id/et_account"
+            android:layout_width="180dip"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:imeOptions="actionNext"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/xiala"
+            android:layout_width="38dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/expand" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/re_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/account"
+        android:layout_alignRight="@+id/account"
+        android:layout_below="@id/account"
+        android:layout_marginTop="10dip"
+        android:background="@drawable/shurukuang" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="密码:"
+            android:textColor="#000000" />
+
+        <EditText
+            android:id="@+id/et_password"
+            android:layout_width="180dip"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:digits="@string/password_digits"
+            android:imeOptions="actionDone"
+            android:password="true"
+            android:singleLine="true" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/expand"
+            android:visibility="invisible" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/mainbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/re_password"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dip" >
+
+        <Button
+            android:id="@+id/btn_login"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button"
+            android:text="登录"
+            android:textColor="#FFFFFF"
+            android:textSize="18dip" />
+
+        <Button
+            android:id="@+id/btn_register"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="60dip"
+            android:layout_toRightOf="@id/btn_login"
+            android:background="@drawable/button"
+            android:text="注册"
+            android:textColor="#FFFFFF"
+            android:textSize="18dip" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/option"
+        android:layout_width="263dip"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/mainbutton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dip"
+        android:paddingLeft="20dip"
+        android:paddingRight="20dip" >
+
+        <CheckBox
+            android:id="@+id/remember"
+            style="@drawable/checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:checked="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/remember"
+            android:text="记住密码" />
+
+       
+    </RelativeLayout>
+
+    
+
+</RelativeLayout>
