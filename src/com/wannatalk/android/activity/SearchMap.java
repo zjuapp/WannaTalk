@@ -31,6 +31,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.BMapManager;
 import com.baidu.mapapi.map.Geometry;
 import com.baidu.mapapi.map.Graphic;
@@ -69,19 +73,19 @@ public class SearchMap extends Activity {
 	private MKMapViewListener mMapListener = null;
 	private MKMapTouchListener mapTouchLister = null;
 	private android.app.AlertDialog.Builder search_people = null;
+ 	private LocationClient local = null;
 	Dialog dlg;
 	private int dis(GeoPoint a, GeoPoint b){
 		return (int)Math.sqrt(((long)(a.getLatitudeE6() - b.getLatitudeE6())) * (a.getLatitudeE6() - b.getLatitudeE6()) + 
 				((long)(a.getLongitudeE6() - b.getLongitudeE6())) * (a.getLongitudeE6() - b.getLongitudeE6()));
 	}
 	public Graphic drawCircle(GeoPoint p) {
-		 
-		   	int distance = dis(p, centerpoint);
+	/*	   	int distance = dis(p, centerpoint);
 		   	Log.v("dis", Integer.toString(distance));
-		   	//构建圆
+		   	//构建圆*/
 	  		Geometry circleGeometry = new Geometry();
 	  		//设置圆中心点坐标和半径
-	  		circleGeometry.setCircle(centerpoint, distance / 10);
+	  		circleGeometry.setCircle(p, 400);
 	  		//设置样式
 	  		Symbol circleSymbol = new Symbol();
 	 		Symbol.Color circleColor = circleSymbol.new Color();
@@ -178,22 +182,38 @@ public class SearchMap extends Activity {
 			    			try{
 			    				List <PeopleItem> arr = new ArrayList<PeopleItem>();
 			    				client.executeMethod(method);
-			    				Log.d("SearchMap", "begin call search");
+			    				Log.d("SearchMapp", "begin call search");
 			    				String response = method.getResponseBodyAsString();
+			    				Log.d("SearchMapp", "begin call search" + response);
+			    				Log.d("Searchsizep", "begin call search" + Integer.toString(response.length()));
 			    				response = response.substring(response.indexOf("<"));
 			    				DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			    				org.w3c.dom.Document document = dBuilder.parse(new ByteArrayInputStream(response.getBytes()));
 			    				NodeList userlist= document.getElementsByTagName("user");
+			    				Log.d("SearchMapp", "begin call search fuck" + response);
 			    				for(int i = 0; i < userlist.getLength(); ++i){
 			    					PeopleItem tmpItem = new PeopleItem();
 			    					org.w3c.dom.Element item = (org.w3c.dom.Element)userlist.item(i);
 			    					tmpItem.id = Integer.valueOf(item.getElementsByTagName("uid").item(0).getFirstChild().getNodeValue());
+			    					Log.d("id", "begin call search" + tmpItem.id);
+			    					
 			    					tmpItem.sex = Boolean.valueOf(item.getElementsByTagName("sex").item(0).getFirstChild().getNodeValue());
-			    					tmpItem.happen = item.getElementsByTagName("signature").item(0).getFirstChild().getNodeValue();
+			    					Log.d("sex", "begin call search" + tmpItem.sex);
+					    			
+			    					if(item.getElementsByTagName("signature").item(0).getFirstChild() == null){
+			    						tmpItem.happen = "";
+			    					}
+			    					else tmpItem.happen = item.getElementsByTagName("signature").item(0).getFirstChild().getNodeValue();
+			    					Log.d("happen", "begin call search" + tmpItem.happen);
+				    				
+			    					
 			    					tmpItem.status = PeopleItem.STATUS[Integer.valueOf(item.getElementsByTagName("motion").
 			    						item(0).getFirstChild().getNodeValue())];
-				    				arr.add(tmpItem);
+			    					Log.d("status", "begin call search" + tmpItem.status);
+				    				
+			    					arr.add(tmpItem);
 			        			}
+			    				Log.d("Searchsize", "begin call search " + Integer.toString(userlist.getLength()));
 			    				data.putInt("numpeople", arr.size());
 			    				for(int i = 0; i < arr.size(); ++i){
 			    					data.putSerializable("people" + i, arr.get(i));
@@ -204,7 +224,7 @@ public class SearchMap extends Activity {
 			    				startActivity(intent);
 			    			} 
 			    			catch(Exception e){
-			    				Log.v("SearchMap", "error", e);
+			    				Log.v("SearchMap", "begin call search error", e);
 			    				e.printStackTrace();
 			    				dlg.dismiss();
 			    			}
@@ -228,6 +248,7 @@ public class SearchMap extends Activity {
         mapView.regMapTouchListner(mapTouchLister);
 		mapView.regMapViewListener(WannaTalkApplication.getInstance().mBMapManager, mMapListener);
 	}
+	/*同步 地点 确定 index*/
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_searchmap);
@@ -237,6 +258,27 @@ public class SearchMap extends Activity {
 		Button search_button = (Button)findViewById(R.id.search_button);
 		final EditText edit = (EditText)findViewById(R.id.search_edit);
 		initmap();
+		local = new LocationClient(getApplicationContext());
+		LocationClientOption option = new LocationClientOption(); 
+        option.setOpenGps(true); // 打开gps 
+        option.setCoorType("bd09ll"); // 设置坐标类型为bd09ll 
+        option.setPriority(LocationClientOption.NetWorkFirst); // 设置网络优先 
+        option.setProdName("demo"); // 设置产品线名称 
+        local.setLocOption(option); 
+        local.registerLocationListener(new BDLocationListener() { 
+			@Override
+			public void onReceiveLocation(BDLocation location) { 
+				Log.v("d","begin f" + Double.toString(location.getLatitude()));
+				Log.v("d","begin f" + Double.toString(location.getLongitude()));
+			}
+
+			@Override
+			public void onReceivePoi(BDLocation arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+        local.start();//将开启与获取位置分开，就可以尽量的在后面的使用中
 		final Geocoder geo = new Geocoder(this, Locale.CHINA);
 		final MapView mapView = (MapView)findViewById(R.id.search_map);
 		Button	syn_button = (Button)findViewById(R.id.setpos_button);
@@ -299,8 +341,8 @@ public class SearchMap extends Activity {
 				}
 				@Override
 				public void onGetSuggestionResult(MKSuggestionResult res, int arg1) {
+					
 				}
-
 				@Override
 				public void onGetShareUrlResult(MKShareUrlResult result, int type,
 						int error) {
@@ -312,6 +354,7 @@ public class SearchMap extends Activity {
 	        
 		search_button.setOnClickListener(new OnClickListener() {
 			public void onClick(View arg0) {
+				Log.v("hebe", "begin f");
 				EditText editCity = (EditText)findViewById(R.id.search_edit);
 				EditText editGeoCodeKey = (EditText)findViewById(R.id.search_edit);
 				//Geo搜索
@@ -319,11 +362,10 @@ public class SearchMap extends Activity {
 			}
 		});
 		syn_button.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				
+				Log.v("hebe", "begin f");
+				//local.requestLocation();
 			}
 		});
 	}
