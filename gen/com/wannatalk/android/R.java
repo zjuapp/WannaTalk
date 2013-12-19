@@ -174,7 +174,7 @@ public final class R {
     }
     public static final class id {
         public static final int account=0x7f080002;
-        public static final int action_settings=0x7f080031;
+        public static final int action_settings=0x7f080037;
         public static final int arrow=0x7f080025;
         public static final int btn_login=0x7f080008;
         public static final int btn_register=0x7f080009;
@@ -186,6 +186,7 @@ public final class R {
         public static final int et_mesg=0x7f08002c;
         public static final int et_password=0x7f080006;
         public static final int head_img=0x7f08001b;
+        public static final int iv_head=0x7f080030;
         public static final int list=0x7f080019;
         public static final int loginhead=0x7f080001;
         public static final int mainbutton=0x7f080007;
@@ -217,11 +218,16 @@ public final class R {
         public static final int sex=0x7f080011;
         public static final int synch=0x7f08000d;
         public static final int talkButton=0x7f08000c;
+        public static final int textView1=0x7f080033;
         public static final int time_text=0x7f08001a;
         public static final int to_mesg_text=0x7f08001d;
+        public static final int tv_info_bar=0x7f080031;
+        public static final int tv_info_text=0x7f080032;
+        public static final int tv_motion=0x7f080034;
+        public static final int tv_user_info_bar=0x7f08002f;
         public static final int updated_at=0x7f080028;
-        public static final int user_face_drawable=0x7f080030;
-        public static final int user_faceback_drawable=0x7f08002f;
+        public static final int user_face_drawable=0x7f080036;
+        public static final int user_faceback_drawable=0x7f080035;
         public static final int xiala=0x7f080004;
     }
     public static final class layout {
@@ -235,6 +241,7 @@ public final class R {
         public static final int peopleitem=0x7f030007;
         public static final int pull_to_refresh=0x7f030008;
         public static final int talk_view=0x7f030009;
+        public static final int user_info_layout=0x7f03000a;
     }
     public static final class menu {
         public static final int login=0x7f070000;

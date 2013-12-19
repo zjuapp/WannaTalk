@@ -53,7 +53,6 @@ public class HttpHelper {
 					sb.append(line);
 				}
 				return sb.toString();
-				
 			}else {
 				Log.d(TAG, "http helper post error!");
 				return null;

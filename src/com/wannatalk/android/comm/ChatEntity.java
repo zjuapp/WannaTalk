@@ -5,6 +5,7 @@ public class ChatEntity {
 	private String message;
 	private String chatTime;
 	private boolean isCome;
+	private int uid;
 	public int getUserImage() {
 		return userImage;
 	}
@@ -28,6 +29,12 @@ public class ChatEntity {
 	}
 	public void setCome(boolean isCome) {
 		this.isCome = isCome;
+	}
+	public int getUid() {
+		return uid;
+	}
+	public void setUid(int uid) {
+		this.uid = uid;
 	}
 	
 }

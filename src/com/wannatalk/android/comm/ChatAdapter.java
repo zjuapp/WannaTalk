@@ -2,15 +2,19 @@ package com.wannatalk.android.comm;
 
 import java.util.ArrayList;
 
-import com.wannatalk.android.R;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.wannatalk.android.R;
+import com.wannatalk.android.activity.UserInfoActivity;
 
 public class ChatAdapter extends BaseAdapter{
 	public static final String TAG = "ChatAdapter";
@@ -52,6 +56,7 @@ public class ChatAdapter extends BaseAdapter{
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ChatHolder chatHolder = null;
+		final int pos = position; 
 		if(convertView == null) {
 			chatHolder = new ChatHolder();
 			if(mChatList.get(position).isCome()) {
@@ -62,6 +67,15 @@ public class ChatAdapter extends BaseAdapter{
 			chatHolder.timeTextView = (TextView) convertView.findViewById(R.id.time_text);
 			chatHolder.mesgTextView = (TextView) convertView.findViewById(R.id.mesg_text);
 			chatHolder.userImageView = (ImageView) convertView.findViewById(R.id.head_img);
+			chatHolder.userImageView.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View arg0) {
+					Intent intent = new Intent(mContext,UserInfoActivity.class);
+					intent.putExtra("uid", mChatList.get(pos).getUid());
+					mContext.startActivity(intent);
+				}
+				
+			});
 			convertView.setTag(chatHolder);
 		} else {
 			chatHolder = (ChatHolder) convertView.getTag();
