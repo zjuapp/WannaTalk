@@ -101,6 +101,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 		intent.putExtra("return-data", true);
 		this.startActivityForResult(intent, GALLERY);
 	}
+	
+	private void takeFromCamera() {
+		
+	}
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub

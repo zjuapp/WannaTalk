@@ -21,6 +21,7 @@ import org.apache.http.message.BasicNameValuePair;
 import android.util.Log;
 
 import com.wannatalk.android.comm.Constants;
+import com.wannatalk.android.utils.*;
 
 public class HttpHelper {
 	public final static String TAG = "HttpHelper";

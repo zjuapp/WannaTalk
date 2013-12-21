@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.wannatalk.android.R;
 import com.wannatalk.android.activity.UserInfoActivity;
+import com.wannatalk.android.comm.*;
 
 public class ChatAdapter extends BaseAdapter{
 	public static final String TAG = "ChatAdapter";

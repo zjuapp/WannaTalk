@@ -1,13 +1,8 @@
 package com.wannatalk.android.activity;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -24,13 +19,11 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import cn.jpush.android.api.JPushInterface;
 
 import com.wannatalk.android.R;
-import com.wannatalk.android.comm.Config;
+import com.wannatalk.android.comm.*;
 import com.wannatalk.android.comm.Constants;
-import com.wannatalk.android.utils.HttpHelper;
 
 public class LoginActivity extends Activity {
 	public static final String TAG = "LoginActivity";
@@ -114,12 +107,12 @@ public class LoginActivity extends Activity {
             	Toast.makeText(LoginActivity.this, "µÇÂ¼³É¹¦", Toast.LENGTH_SHORT).show();
             	Config.username = username;
             	resetAliasAndTags();
-        		startActivity(new Intent(LoginActivity.this, SearchMap.class));
+            	startActivity(new Intent(LoginActivity.this, SearchMap.class));
+        		finish();
                 break;  
             case 0:
     			Toast.makeText(LoginActivity.this, "µÇÂ¼Ê§°Ü", Toast.LENGTH_SHORT).show();
-            }  
-            
+            }   
         }  
     };
 
