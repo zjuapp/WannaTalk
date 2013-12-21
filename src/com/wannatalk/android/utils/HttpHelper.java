@@ -69,7 +69,7 @@ public class HttpHelper {
 
 	}
 	
-	public static boolean postImg(){
+	public static boolean postImg(String filePath, int width, int height){
 		return false;
 	}
 

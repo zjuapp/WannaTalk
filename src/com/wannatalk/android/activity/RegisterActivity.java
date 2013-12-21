@@ -1,15 +1,26 @@
 package com.wannatalk.android.activity;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -43,6 +54,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	private PopupWindow mPopupWindow = null;
 	private View mMenuView = null;
 	private boolean isPopupWindowShowing = false;
+	private String photoPath;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -103,6 +115,56 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	}
 	
 	private void takeFromCamera() {
+		if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+			Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+			File dir = new File(Environment.getExternalStorageDirectory() + "/DICM/Camera");
+			if(!dir.exists()){
+				dir.mkdir();
+			}
+			photoPath = dir + "/" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".jpg";
+			File file = new File(photoPath);
+			intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+			this.startActivityForResult(intent, CAMERA);
+		} else {
+			Toast.makeText(this, "SDø®≤ªø…”√", Toast.LENGTH_SHORT);
+		}
+	}
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data){
+		if(requestCode == GALLERY) {
+			Bundle extras = data.getExtras();
+			String filePath = "";
+			if(extras != null) {
+				Bitmap bm = null;
+				ContentResolver resolver = getContentResolver();
+				try {
+					Uri originUri = data.getData();
+					String[] proj = {MediaStore.Images.Media.DATA};
+					Cursor cursor = resolver.query(originUri, proj, null, null, null);
+					if(cursor.moveToFirst()){
+						int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+						filePath = cursor.getString(columnIndex);
+					}
+					uploadImg(filePath);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}else if(requestCode == CAMERA){
+				uploadImg(photoPath);
+			}
+		}
+	}
+	
+	public void uploadImg(String filePath) {
+		
+	}
+	class UploadImage extends AsyncTask<String , Integer, String> {
+
+		@Override
+		protected String doInBackground(String... params) {
+			
+			return null;
+		}
 		
 	}
 	@Override
