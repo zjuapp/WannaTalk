@@ -65,9 +65,11 @@ public class HttpHelper {
 			}
 		}
 		return null;
-		
+
+	}
 	
-		
+	public static boolean postImg(){
+		return false;
 	}
 
 }

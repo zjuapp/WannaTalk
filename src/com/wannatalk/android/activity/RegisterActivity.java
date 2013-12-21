@@ -11,11 +11,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Toast;
@@ -25,6 +30,8 @@ import com.wannatalk.android.comm.Constants;
 
 public class RegisterActivity extends Activity implements OnClickListener {
 	public static final String TAG = "RegisterActivity";
+	private static final int GALLERY = 20;
+	private static final int CAMERA = 21;
 	protected Button register;
 	protected Button cancel;
 	protected EditText name;
@@ -32,6 +39,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	protected EditText confirm;
 	protected boolean b = false;
 	protected int sex = 0; 
+	private ImageView mHeadView = null;
+	private PopupWindow mPopupWindow = null;
+	private View mMenuView = null;
+	private boolean isPopupWindowShowing = false;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,15 +52,55 @@ public class RegisterActivity extends Activity implements OnClickListener {
 		confirm = (EditText) findViewById(R.id.confirm);
 		register = (Button) findViewById(R.id.register);
 		cancel = (Button) findViewById(R.id.cancel);
+		LayoutInflater mLayoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		mMenuView = mLayoutInflater.inflate(R.layout.update_head_menu_view, null);
+		mPopupWindow = new PopupWindow(mMenuView, LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		mPopupWindow.setOutsideTouchable(true);
+		mPopupWindow.setAnimationStyle(android.R.style.Animation_Dialog);
+		mPopupWindow.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.bg_popmenu));
+        mPopupWindow.update();
+        mPopupWindow.setTouchable(true);
+        /*设置点击menu以外其他地方以及返回键退出*/
+        mPopupWindow.setFocusable(true);
+        View[] menu = new View[3];
+        menu[0] = mMenuView.findViewById(R.id.btn_head_camera);
+        menu[1] = mMenuView.findViewById(R.id.btn_head_photo);
+        menu[2] = mMenuView.findViewById(R.id.btn_cancel);
+        menu[0].setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				
+				
+			}
+        	
+        });
+        menu[2].setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				mPopupWindow.dismiss();
+			}
+        	
+        });
+      	mHeadView = (ImageView) findViewById(R.id.iv_head);
+		mHeadView.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View view) {
+				if(!isPopupWindowShowing){
+					mPopupWindow.showAtLocation(RegisterActivity.this.findViewById(R.id.register_layout), Gravity.BOTTOM, 0, 0);
+				}
+			}
+			
+		});
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.register, menu);
-		return true;
+	private void takeFromGallery() {
+		Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
+		intent.setType("image/*");
+		intent.putExtra("return-data", true);
+		this.startActivityForResult(intent, GALLERY);
 	}
-
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
@@ -117,5 +168,12 @@ public class RegisterActivity extends Activity implements OnClickListener {
             
         }  
 	};
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.register, menu);
+		return true;
+	}
 }
 

@@ -2,21 +2,29 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:id="@+id/register_layout"
     android:background="#EEEEFF" >
 
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="欢迎加入WannaTalk"
+        android:textColor="#FF0000"
+        android:textSize="21dip" />
+
     <LinearLayout
+        android:id="@+id/register_body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_below="@+id/iv_head"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="26dp"
         android:orientation="vertical" >
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="欢迎加入WannaTalk"
-            android:textColor="#FF0000"
-            android:textSize="21dip" />
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -50,7 +58,10 @@
                         android:hint="您的昵称"
                         android:imeOptions="actionNext"
                         android:paddingLeft="10dip"
-                        android:singleLine="true" />
+                        android:singleLine="true" >
+
+                        <requestFocus />
+                    </EditText>
                 </LinearLayout>
 
                 <LinearLayout
@@ -158,5 +169,14 @@
                 android:textSize="18dip" />
         </LinearLayout>
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_head"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_below="@+id/textView1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="27dp"
+        android:src="@drawable/avatar_default" />
 
 </RelativeLayout>
