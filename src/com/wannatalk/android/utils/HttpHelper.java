@@ -1,6 +1,7 @@
 package com.wannatalk.android.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,6 +9,10 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -17,10 +22,13 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import android.util.Log;
 
 import com.wannatalk.android.comm.Constants;
+import com.wannatalk.android.model.PeopleItem;
 
 public class HttpHelper {
 	public final static String TAG = "HttpHelper";
@@ -67,8 +75,28 @@ public class HttpHelper {
 		}
 		return null;
 		
-	
-		
 	}
-
+	public static List <PeopleItem> getpeople(String response) throws ParserConfigurationException, SAXException, IOException{
+		response = response.substring(response.indexOf("<"));
+		List <PeopleItem> arr = new ArrayList<PeopleItem>();
+		DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		org.w3c.dom.Document document = dBuilder.parse(new ByteArrayInputStream(response.getBytes()));
+		NodeList userlist= document.getElementsByTagName("user");
+		for(int i = 0; i < userlist.getLength(); ++i){
+			PeopleItem tmpItem = new PeopleItem();
+			org.w3c.dom.Element item = (org.w3c.dom.Element)userlist.item(i);
+			tmpItem.id = Integer.valueOf(item.getElementsByTagName("uid").item(0).getFirstChild().getNodeValue());
+			tmpItem.sex = Boolean.valueOf(item.getElementsByTagName("sex").item(0).getFirstChild().getNodeValue());
+			if(item.getElementsByTagName("signature").item(0).getFirstChild() == null){
+				tmpItem.happen = "";
+			}
+			else tmpItem.happen = item.getElementsByTagName("signature").item(0).getFirstChild().getNodeValue();
+			tmpItem.motion = Integer.valueOf(item.getElementsByTagName("motion").
+				item(0).getFirstChild().getNodeValue());	
+			tmpItem.motionlevel = Integer.valueOf(item.getElementsByTagName("motionlevel").
+					item(0).getFirstChild().getNodeValue());
+			arr.add(tmpItem);
+		}
+		return arr;
+	}
 }

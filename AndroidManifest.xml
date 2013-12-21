@@ -86,9 +86,11 @@
             android:name="com.wannatalk.android.activity.TalkActivity"
         	>
         </activity>
-        <activity android:name="com.wannatalk.android.activity.SearchMap">
+        <activity android:name="com.wannatalk.android.activity.IndexInf">
         </activity>
         <activity android:name="com.wannatalk.android.activity.ShowPeople">
+        </activity>
+        <activity android:name="com.wannatalk.android.activity.SigModify">
         </activity>
         <activity android:name="com.wannatalk.android.activity.RegisterActivity">
             

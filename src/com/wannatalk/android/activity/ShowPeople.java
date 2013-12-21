@@ -25,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wannatalk.android.R;
+import com.wannatalk.android.comm.Constants;
 import com.wannatalk.android.model.PeopleItem;
 
 public class ShowPeople extends Activity implements OnScrollListener{
@@ -112,7 +113,7 @@ public class ShowPeople extends Activity implements OnScrollListener{
 				viewholder = (Viewholder)convertView.getTag();
 			viewholder.id.setText(Integer.toString(arr.get(arg0).id));
 			viewholder.id.setTextColor(arr.get(arg0).sex ? Color.BLUE: Color.RED);
-			viewholder.status.setText(arr.get(arg0).status);
+			viewholder.status.setText(Constants.ModState[arr.get(arg0).motion]);
 			return convertView;
 		}
     }
@@ -132,7 +133,6 @@ public class ShowPeople extends Activity implements OnScrollListener{
         }
         
         Log.v("numpeople",Integer.toString(arr.size()));
-        Log.v("fuck", arr.get(0).status);
         lv.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int pos,
