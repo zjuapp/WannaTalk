@@ -114,12 +114,12 @@ public class LoginActivity extends Activity {
             	Toast.makeText(LoginActivity.this, "µÇÂ¼³É¹¦", Toast.LENGTH_SHORT).show();
             	Config.username = username;
             	resetAliasAndTags();
-        		startActivity(new Intent(LoginActivity.this, SearchMap.class));
+            	startActivity(new Intent(LoginActivity.this, SearchMap.class));
+        		finish();
                 break;  
             case 0:
     			Toast.makeText(LoginActivity.this, "µÇÂ¼Ê§°Ü", Toast.LENGTH_SHORT).show();
-            }  
-            
+            }   
         }  
     };
 

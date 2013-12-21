@@ -25,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wannatalk.android.R;
+import com.wannatalk.android.model.PeopleItem;
 
 public class ShowPeople extends Activity implements OnScrollListener{
 	List<String> data;
@@ -39,15 +40,7 @@ public class ShowPeople extends Activity implements OnScrollListener{
     List <PeopleItem> arr = new ArrayList<PeopleItem>();
     int size = 1;
     // 初始化组件
-    static class PeopleItem implements Serializable{
-    	private static final long serialVersionUID = 1L;
-		public final static String [] STATUS = new String [] {"happy", "annoyed", "sorror", "justsoso"};
-    	public int id;
-    	public boolean sex;
-    	public String imgtext;
-    	public String status;
-    	public String happen;
-    }
+    
     private void initWidget() {
         lv = (ListView) findViewById(R.id.list);
         footer = new LinearLayout(this);  

@@ -13,17 +13,24 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.w3c.dom.NodeList;
 
+import android.R.string;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -60,11 +67,12 @@ import com.baidu.mapapi.search.MKTransitRouteResult;
 import com.baidu.mapapi.search.MKWalkingRouteResult;
 import com.baidu.platform.comapi.basestruct.GeoPoint;
 import com.wannatalk.android.R;
-import com.wannatalk.android.activity.ShowPeople.PeopleItem;
+import com.wannatalk.android.model.*;
+import com.wannatalk.android.comm.Config;
 import com.wannatalk.android.comm.Constants;
 import com.wannatalk.android.comm.WannaTalkApplication;
 
-public class SearchMap extends Activity {
+public class SearchMap extends Activity{
 	//private final MapView mapView = (MapView)findViewById(R.id.search_map);
 	//private final GeoPoint centerpoint = new GeoPoint((int)(39.945 * 1E6), (int)(116.404 * 1E6));
 	private GeoPoint centerpoint = null;
@@ -73,19 +81,20 @@ public class SearchMap extends Activity {
 	private MKMapViewListener mMapListener = null;
 	private MKMapTouchListener mapTouchLister = null;
 	private android.app.AlertDialog.Builder search_people = null;
+	private MapView mapView = null;
  	private LocationClient local = null;
+ 	private PeopleItem User = null;
 	Dialog dlg;
 	private int dis(GeoPoint a, GeoPoint b){
 		return (int)Math.sqrt(((long)(a.getLatitudeE6() - b.getLatitudeE6())) * (a.getLatitudeE6() - b.getLatitudeE6()) + 
 				((long)(a.getLongitudeE6() - b.getLongitudeE6())) * (a.getLongitudeE6() - b.getLongitudeE6()));
 	}
 	public Graphic drawCircle(GeoPoint p) {
-	/*	   	int distance = dis(p, centerpoint);
-		   	Log.v("dis", Integer.toString(distance));
-		   	//构建圆*/
+			//构建圆*/
+			int dis = dis(p, mapView.getMapCenter());
 	  		Geometry circleGeometry = new Geometry();
 	  		//设置圆中心点坐标和半径
-	  		circleGeometry.setCircle(p, 400);
+	  		circleGeometry.setCircle(p, dis / 10);
 	  		//设置样式
 	  		Symbol circleSymbol = new Symbol();
 	 		Symbol.Color circleColor = circleSymbol.new Color();
@@ -99,7 +108,6 @@ public class SearchMap extends Activity {
 	  		return circleGraphic;
 	   }
 	private void initmap(){
-		final MapView mapView = (MapView)findViewById(R.id.search_map);
 		final WannaTalkApplication app = (WannaTalkApplication)this.getApplication(); 
 		search_people = new AlertDialog.Builder(this);
 		if (app.mBMapManager == null) { //init
@@ -174,9 +182,9 @@ public class SearchMap extends Activity {
 			    			client.getHostConfiguration().setHost(Constants.REQUEST_HOST,8081,"http");
 			    			PostMethod method = new PostMethod("/api/search");
 			    			NameValuePair []user = {
-			    					new NameValuePair("lat", "0"),//Integer.toString(centerpoint.getLatitudeE6())), 
-			    					new NameValuePair("lon", "0"),//Integer.toString(centerpoint.getLongitudeE6())),
-			    					new NameValuePair("r", "1")//Integer.toString(dis(centerpoint, point)))
+			    					new NameValuePair("lat", "0"),//Integer.toString(point.getLatitudeE6())), 
+			    					new NameValuePair("lon", "0"),//Integer.toString(point.getLongitudeE6())),
+			    					new NameValuePair("r", "1")//Integer.toString(dis(mapView.getMapCenter(), point)))
 			    			};	
 			    			method.setRequestBody(user);
 			    			try{
@@ -233,6 +241,14 @@ public class SearchMap extends Activity {
 					}
 		        }
 				);
+		        search_people.setOnCancelListener(new OnCancelListener(){
+					@Override
+					public void onCancel(DialogInterface arg0) {
+						// TODO Auto-generated method stub
+						mapView.getOverlays().clear();
+						mapView.refresh();
+					}
+				});
 		        search_people.create().show();
 			}
 			@Override
@@ -252,26 +268,32 @@ public class SearchMap extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_searchmap);
+		mapView = (MapView)findViewById(R.id.search_map);
 		CharSequence textCharSequence = "查找聊天对象";
 		setTitle(textCharSequence);
 		centerpoint = new GeoPoint((int)(39.945 * 1E6), (int)(116.404 * 1E6));
+		User = new PeopleItem();
+		User.id = 106;
 		Button search_button = (Button)findViewById(R.id.search_button);
 		final EditText edit = (EditText)findViewById(R.id.search_edit);
 		initmap();
 		local = new LocationClient(getApplicationContext());
 		LocationClientOption option = new LocationClientOption(); 
-        option.setOpenGps(true); // 打开gps 
-        option.setCoorType("bd09ll"); // 设置坐标类型为bd09ll 
+        option.setCoorType("gcj02"); 
         option.setPriority(LocationClientOption.NetWorkFirst); // 设置网络优先 
         option.setProdName("demo"); // 设置产品线名称 
-        local.setLocOption(option); 
+        local.setLocOption(option);
         local.registerLocationListener(new BDLocationListener() { 
 			@Override
 			public void onReceiveLocation(BDLocation location) { 
+				if(location == null) return;
 				Log.v("d","begin f" + Double.toString(location.getLatitude()));
 				Log.v("d","begin f" + Double.toString(location.getLongitude()));
+				centerpoint.setLatitudeE6((int) (location.getLatitude() * 1e6));
+				centerpoint.setLongitudeE6((int) (location.getLongitude() * 1e6));
+				String strInfo = String.format("纬度：%f 经度：%f", location.getLatitude(), location.getLongitude());
+				Toast.makeText(SearchMap.this, strInfo.toString(), Toast.LENGTH_LONG).show();
 			}
-
 			@Override
 			public void onReceivePoi(BDLocation arg0) {
 				// TODO Auto-generated method stub
@@ -294,9 +316,10 @@ public class SearchMap extends Activity {
 						return;
 					}
 					//地图移动到该点
+				
 					mapView.getController().animateTo(res.geoPt);
-					centerpoint.setLatitudeE6(res.geoPt.getLatitudeE6());
-					centerpoint.setLongitudeE6(res.geoPt.getLongitudeE6());
+					centerpoint.setLatitudeE6((int)(res.geoPt.getLatitudeE6()));
+					centerpoint.setLongitudeE6((int)(res.geoPt.getLongitudeE6()));
 					if (res.type == MKAddrInfo.MK_GEOCODE){
 						//地理编码：通过地址检索坐标点
 						String strInfo = String.format("纬度：%f 经度：%f", res.geoPt.getLatitudeE6()/1e6, res.geoPt.getLongitudeE6()/1e6);
@@ -354,19 +377,63 @@ public class SearchMap extends Activity {
 	        
 		search_button.setOnClickListener(new OnClickListener() {
 			public void onClick(View arg0) {
-				Log.v("hebe", "begin f");
-				EditText editCity = (EditText)findViewById(R.id.search_edit);
-				EditText editGeoCodeKey = (EditText)findViewById(R.id.search_edit);
-				//Geo搜索
-				mSearch.geocode("浙江大学", "杭州");
+				EditText editplace = (EditText)findViewById(R.id.search_edit);
+				mSearch.geocode(editplace.getText().toString(), "");
 			}
 		});
 		syn_button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				Log.v("hebe", "begin f");
-				//local.requestLocation();
+				if (local != null && local.isStarted()){
+					local.requestLocation();
+					mSearch.reverseGeocode(centerpoint);
+					new Thread(){
+						public void run(){	
+							Looper.prepare();
+							int res = synchronize(User.id, centerpoint.getLatitudeE6(), centerpoint.getLongitudeE6());
+							Message message = new Message();
+							message.what = res;
+							handle_syn.sendMessage(message);
+						}
+					}.start();
+				}
 			}
 		});
 	}
+	private int synchronize(int id, int lat, int lon){
+		HttpClient client = new HttpClient();
+		client.getHostConfiguration().setHost(Constants.REQUEST_HOST,8081,"http");
+		PostMethod method = new PostMethod("/api/update");
+		NameValuePair []user = {
+			new NameValuePair("lat", Integer.toString(lat)),//Integer.toString(centerpoint.getLatitudeE6())), 
+			new NameValuePair("lon", Integer.toString(lon)),//Integer.toString(centerpoint.getLongitudeE6())),
+			new NameValuePair("id", Integer.toString(id))//Integer.toString(dis(centerpoint, point)))
+		};	
+		method.setRequestBody(user);
+		try{
+			client.executeMethod(method);
+			String response = method.getResponseBodyAsString();
+			if("true".equals(response))
+				return 1;
+			else 
+				return 0;
+			
+		}
+		catch(Exception e){
+			Log.v("network", "update error");
+			return 0;
+		}
+	}
+	private Handler handle_syn = new Handler(){
+		public void handleMessage(Message msg){  
+       	   switch(msg.what) {  
+           case 1:  
+           	Toast.makeText(SearchMap.this, "同步成功", Toast.LENGTH_SHORT).show();
+            break;  
+           case 0:
+   			Toast.makeText(SearchMap.this, "同步失败", Toast.LENGTH_SHORT).show();
+           }  
+           
+       }  
+	};
 }
