@@ -16,7 +16,7 @@
     		android:textSize="18sp"
     		android:background="#486a9a"
     		android:textColor="@android:color/white"
-    		android:text="Chat"/>
+    		android:text="聊天"/>
     </RelativeLayout>
     
     <RelativeLayout 
