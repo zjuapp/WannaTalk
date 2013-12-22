@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.Display;
@@ -12,12 +13,15 @@ import android.view.WindowManager;
 public class CompressImage {
 	private Bitmap bm;
     private String filePath;
-    private Activity context;
+    private Context context;
     private int width;
     private int height;
-    public CompressImage(Activity context,String filePath, int width, int height) {
+    public CompressImage(Context context,String filePath, int width, int height) {
         this.filePath = filePath;
         this.context = context;
+        this.width   = width;
+        this.height  = height;
+        		
     }
     public Bitmap getBitmap() throws Exception{
         BitmapFactory.Options opt = new BitmapFactory.Options();

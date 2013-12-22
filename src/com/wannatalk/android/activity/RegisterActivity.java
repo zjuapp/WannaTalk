@@ -1,16 +1,17 @@
 package com.wannatalk.android.activity;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -26,6 +27,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
@@ -38,6 +40,8 @@ import android.widget.Toast;
 
 import com.wannatalk.android.R;
 import com.wannatalk.android.comm.Constants;
+import com.wannatalk.android.utils.CompressImage;
+import com.wannatalk.android.utils.HttpHelper;
 
 public class RegisterActivity extends Activity implements OnClickListener {
 	public static final String TAG = "RegisterActivity";
@@ -55,9 +59,12 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	private View mMenuView = null;
 	private boolean isPopupWindowShowing = false;
 	private String photoPath;
+	private Context mContext;
+	private Bitmap headImg;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mContext = this.getApplicationContext();
 		setContentView(R.layout.activity_register);
 		name = (EditText) findViewById(R.id.name);
 		pwd = (EditText) findViewById(R.id.pwd);
@@ -82,10 +89,17 @@ public class RegisterActivity extends Activity implements OnClickListener {
 
 			@Override
 			public void onClick(View v) {
-				
-				
+				Log.d(TAG, "btn_head_camera is clicked");
+				takeFromCamera();
 			}
         	
+        });
+        menu[1].setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				takeFromGallery();
+			}
         });
         menu[2].setOnClickListener(new OnClickListener(){
 
@@ -103,11 +117,11 @@ public class RegisterActivity extends Activity implements OnClickListener {
 					mPopupWindow.showAtLocation(RegisterActivity.this.findViewById(R.id.register_layout), Gravity.BOTTOM, 0, 0);
 				}
 			}
-			
 		});
 	}
 
 	private void takeFromGallery() {
+		Log.d(TAG, "take from gallery");
 		Intent intent = new Intent(Intent.ACTION_GET_CONTENT, null);
 		intent.setType("image/*");
 		intent.putExtra("return-data", true);
@@ -115,55 +129,106 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	}
 	
 	private void takeFromCamera() {
+		Log.d(TAG, "take from camera");
 		if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
 			Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-			File dir = new File(Environment.getExternalStorageDirectory() + "/DICM/Camera");
+			File dir = new File(Environment.getExternalStorageDirectory()+"");
 			if(!dir.exists()){
+				Log.d(TAG, "make dir " + dir.getAbsolutePath());
 				dir.mkdir();
 			}
-			photoPath = dir + "/" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".jpg";
+			photoPath = dir + "/" + "image.jpg";
+			Log.d(TAG, "photo path is " + photoPath);
 			File file = new File(photoPath);
 			intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
 			this.startActivityForResult(intent, CAMERA);
 		} else {
-			Toast.makeText(this, "SD卡不可用", Toast.LENGTH_SHORT);
+			Toast.makeText(this, "SD卡不可用", Toast.LENGTH_SHORT).show();
 		}
 	}
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data){
 		if(requestCode == GALLERY) {
-			Bundle extras = data.getExtras();
+			Log.d(TAG, "request code is GALLERY");
 			String filePath = "";
-			if(extras != null) {
-				Bitmap bm = null;
-				ContentResolver resolver = getContentResolver();
-				try {
-					Uri originUri = data.getData();
-					String[] proj = {MediaStore.Images.Media.DATA};
-					Cursor cursor = resolver.query(originUri, proj, null, null, null);
-					if(cursor.moveToFirst()){
-						int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-						filePath = cursor.getString(columnIndex);
-					}
-					uploadImg(filePath);
-				}catch(Exception e) {
-					e.printStackTrace();
+			ContentResolver resolver = getContentResolver();
+			try {
+				Uri originUri = data.getData();
+				String[] proj = {MediaStore.Images.Media.DATA};
+				Cursor cursor = resolver.query(originUri, proj, null, null, null);
+				if(cursor.moveToFirst()){
+					int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+					filePath = cursor.getString(columnIndex);
 				}
-			}else if(requestCode == CAMERA){
-				uploadImg(photoPath);
+				cursor.close();
+				Log.d(TAG, "file path is " + filePath);
+				uploadImg(filePath);
+				
+			}catch(Exception e) {
+				Log.d(TAG, "Exception : ", e );
+				e.printStackTrace();
 			}
+		}else if(requestCode == CAMERA){
+			uploadImg(photoPath);
+			
 		}
 	}
 	
 	public void uploadImg(String filePath) {
-		
+		Log.d(TAG, "upload img in " + filePath);
+		new UploadImage().execute(filePath);
 	}
-	class UploadImage extends AsyncTask<String , Integer, String> {
-
+	class UploadImage extends AsyncTask<String , Integer, Boolean> {
+		ProgressDialog onUploadDialog;
+		int headWidth;
+		int headHeight;
+		public UploadImage(){
+			mPopupWindow.dismiss();
+			LayoutInflater inflater = LayoutInflater.from(mContext);
+			View view = inflater.inflate(R.layout.activity_register, null);
+			ImageView headView = (ImageView) view.findViewById(R.id.iv_head);
+			headView.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+							 MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+			headWidth = headView.getMeasuredWidth();
+			headHeight = headView.getMeasuredHeight();
+			Log.d(TAG, "head width and height are " + headWidth + " ," + headHeight);
+			onUploadDialog = new ProgressDialog(RegisterActivity.this); 
+			onUploadDialog.setTitle("上传头像");
+			onUploadDialog.setMessage("正在上传");
+			onUploadDialog.show();
+		}
+		
+	    @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+	    
 		@Override
-		protected String doInBackground(String... params) {
-			
-			return null;
+		protected Boolean doInBackground(String... params) {
+			Log.d(TAG, "upload img asynctask is invoked");
+			String path = params[0];
+			CompressImage ci = new CompressImage(mContext, path, headWidth, headHeight);
+			try {
+				headImg = ci.getBitmap();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return HttpHelper.postImg(mContext, path, headWidth, headHeight);
+		}
+		@Override
+        protected void onPostExecute(Boolean result) {
+			onUploadDialog.dismiss();
+			if(result) {
+				Toast.makeText(mContext, "上传图片成功", Toast.LENGTH_SHORT).show();
+				mHeadView.setImageBitmap(headImg);
+				SharedPreferences sp = mContext.getSharedPreferences("user_info", 0);
+				SharedPreferences.Editor editor = sp.edit();
+				editor.putString("head_img", photoPath);
+				editor.commit();
+			}else {
+				Toast.makeText(mContext, "上传图片失败", Toast.LENGTH_SHORT).show();
+			}	
 		}
 		
 	}
@@ -226,6 +291,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
             switch(msg.what) {  
             case 1:  
             	Toast.makeText(RegisterActivity.this, "注册成功", Toast.LENGTH_SHORT).show();
+            	RegisterActivity.this.finish();
         		startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                 break;  
             case 0:

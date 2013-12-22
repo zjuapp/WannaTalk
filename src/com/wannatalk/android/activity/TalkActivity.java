@@ -56,7 +56,7 @@ public class TalkActivity extends Activity{
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		isForeground = true;
 		Intent intent = this.getIntent();
-		fid = intent.getExtras().getInt("fid");
+		fid = intent.getExtras().getInt("friendId");
 		initView();
 		init();
 		registerMessageReceiver();
@@ -115,8 +115,8 @@ public class TalkActivity extends Activity{
 					new Thread(){
 						@Override
 						public void run() {
-							//pushMessage(mesg, "" + fid);
-							pushMessage(mesg, "" +Config.uid);
+							pushMessage(mesg, "" + fid);
+							//pushMessage(mesg, "" + Config.uid);
 						}
 					}.start();
 				}

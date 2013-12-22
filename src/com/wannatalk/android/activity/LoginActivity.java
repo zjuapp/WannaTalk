@@ -1,6 +1,6 @@
 package com.wannatalk.android.activity;
 
-import org.apache.commons.httpclient.HttpClient;
+
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 
@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -22,8 +21,10 @@ import android.widget.Toast;
 import cn.jpush.android.api.JPushInterface;
 
 import com.wannatalk.android.R;
-import com.wannatalk.android.comm.*;
-import com.wannatalk.android.comm.Constants;
+import com.wannatalk.android.comm.Config;
+import com.wannatalk.android.model.PeopleItem;
+import com.wannatalk.android.utils.HttpHelper;
+
 
 public class LoginActivity extends Activity {
 	public static final String TAG = "LoginActivity";
@@ -36,7 +37,6 @@ public class LoginActivity extends Activity {
 	Dialog dialog;
 	boolean returnval = false;
 	protected void onCreate(Bundle savedInstanceState) {
-		
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 	    setContentView(R.layout.activity_login);
@@ -56,11 +56,15 @@ public class LoginActivity extends Activity {
 						public void run(){
 							Looper.prepare();
 							username = accountEt.getText().toString();
-							int b=login(accountEt.getText().toString(), passwordEt.getText().toString());
-							if(b != 0) 
-								Config.uid = b;
+							PeopleItem people = login(accountEt.getText().toString(), passwordEt.getText().toString());
+							int b = 0;
+							if(people == null) b = 0;
+							else{
+								Config.makeconfig(people);//login information
+								b = 1;
+							}
 							Message m=new Message();  
-	                        m.what= b != 0 ? 1:0;
+	                        m.what= b;
 	                        handler.sendMessage(m);
 						}
 					}.start();
@@ -74,9 +78,7 @@ public class LoginActivity extends Activity {
 	    });
 	}
 	
-	int login(final String a, final String p){
-				HttpClient client = new HttpClient();
-				client.getHostConfiguration().setHost(Constants.REQUEST_HOST,8081,"http");
+	PeopleItem login(final String a, final String p){
 				PostMethod method = new PostMethod("/api/login");
 				NameValuePair []user = {
 						new NameValuePair("username", a), 
@@ -84,30 +86,28 @@ public class LoginActivity extends Activity {
 					};
 				method.setRequestBody(user);
 			try{
-				client.executeMethod(method);
+				Config.client.executeMethod(method);
 				String response = method.getResponseBodyAsString();
-				Log.v("response", response);
-				return Integer.parseInt(response);
+				if("false".equals(response)) return null;
+				return HttpHelper.getpeople(response).get(0);
 			}
 			catch(Exception e){
 				e.printStackTrace();
-				return 0;
+				return null;
 			}
 	}
 	
 	private void resetAliasAndTags() {
-		JPushInterface.setAliasAndTags(this, ""+Config.uid, null);
+		JPushInterface.setAliasAndTags(this, ""+ Config.uid, null);
 	}
-	
 	private Handler handler=new Handler(){  
         public void handleMessage(Message msg){  
         	 dialog.dismiss();
             switch(msg.what) {  
             case 1:  
-            	Toast.makeText(LoginActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
-            	Config.username = username;
+            	Toast.makeText(LoginActivity.this, "登录成功 -- id is " + Config.uid , Toast.LENGTH_SHORT).show();
             	resetAliasAndTags();
-            	startActivity(new Intent(LoginActivity.this, SearchMap.class));
+            	startActivity(new Intent(LoginActivity.this, IndexInf.class));
         		finish();
                 break;  
             case 0:
