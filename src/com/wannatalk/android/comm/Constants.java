@@ -2,8 +2,8 @@ package com.wannatalk.android.comm;
 
 public class Constants {
 
-	public static final String REQUEST_PATH = "http://192.168.191.1:8081/";
-	public static final String REQUEST_HOST = "192.168.191.1";
+	public static final String REQUEST_PATH = "http://192.168.191.5:8081/";
+	public static final String REQUEST_HOST = "192.168.191.5";
 
 	public static final String ModState[] = "happy annoyed sorrow just-soso".split(" ");
 

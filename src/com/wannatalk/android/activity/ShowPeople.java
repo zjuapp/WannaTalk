@@ -22,6 +22,7 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.wannatalk.android.R;
@@ -97,7 +98,9 @@ public class ShowPeople extends Activity implements OnScrollListener{
 		}
 		class Viewholder {
 			TextView id;
-			TextView status;
+			TextView motion;
+			TextView happen;
+			RatingBar motionlevel;
 		}
 		@Override
 		public View getView(int arg0, View convertView, ViewGroup parent) {
@@ -107,14 +110,18 @@ public class ShowPeople extends Activity implements OnScrollListener{
 				convertView = getLayoutInflater().inflate(R.layout.peopleitem, null);
 				viewholder = new Viewholder();
 				viewholder.id = (TextView)convertView.findViewById(R.id.people_id);
-				viewholder.status = (TextView)convertView.findViewById(R.id.people_status);
+				viewholder.motion = (TextView)convertView.findViewById(R.id.people_status);
+				viewholder.happen = (TextView)convertView.findViewById(R.id.people_happen);
+				viewholder.motionlevel = (RatingBar)convertView.findViewById(R.id.people_status_rating);
 				convertView.setTag(viewholder);
 			}
 			else
 				viewholder = (Viewholder)convertView.getTag();
 			viewholder.id.setText(Integer.toString(arr.get(arg0).id));
 			viewholder.id.setTextColor(arr.get(arg0).sex ? Color.BLUE: Color.RED);
-			viewholder.status.setText(Constants.ModState[arr.get(arg0).motion]);
+			viewholder.motion.setText(Constants.ModState[arr.get(arg0).motion]);
+			viewholder.happen.setText(arr.get(arg0).happen);
+			viewholder.motionlevel.setRating((float) (arr.get(arg0).motionlevel * 1.0 / 2));
 			return convertView;
 		}
     }
