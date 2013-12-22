@@ -39,14 +39,13 @@ import com.wannatalk.android.utils.HttpHelper;
 import com.wannatalk.android.utils.StringUtils;
 
 public class TalkActivity extends Activity{
-	
 	public static final String TAG = "TalkActivity";
 	public static boolean isForeground = false;
+	public static int fid   = 0;
 	private String      mesg = null;
 	private Handler mHandler = null;
-	private int fid          = 0;
 	private DatabaseService ds = new DatabaseService(this);
-	
+	boolean isNotify = false;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -57,6 +56,10 @@ public class TalkActivity extends Activity{
 		isForeground = true;
 		Intent intent = this.getIntent();
 		fid = intent.getExtras().getInt("friendId");
+		isNotify = intent.getExtras().getBoolean("notification", false);
+		if(isNotify){
+			mesg = intent.getExtras().getString("content"); 
+		}
 		initView();
 		init();
 		registerMessageReceiver();
@@ -123,6 +126,13 @@ public class TalkActivity extends Activity{
 			}
 		});
 		adapter = new ChatAdapter(this, chatList);
+		if(isNotify){
+			ChatEntity entity = new ChatEntity();
+			entity.setChatTime(StringUtils.getCurTime());
+			entity.setCome(true);
+			entity.setMessage(mesg);
+			chatList.add(entity);
+		}
 		mListView.setAdapter(adapter);
 	}
 	
