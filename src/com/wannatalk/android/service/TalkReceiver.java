@@ -3,20 +3,28 @@ package com.wannatalk.android.service;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import cn.jpush.android.api.JPushInterface;
+
+import com.wannatalk.android.R;
 import com.wannatalk.android.activity.TalkActivity;
 import com.wannatalk.android.utils.StringUtils;
 
 public class TalkReceiver extends BroadcastReceiver{
 	private static final String TAG = "TalkRecevier";
+	private Context mContext;
 	@Override
 	public void onReceive(Context context, Intent intent) {
         Bundle bundle = intent.getExtras();
+        mContext = context;
 		Log.d(TAG, "onReceive - " + intent.getAction() + ", extras: " + printBundle(bundle));
 		
         if (JPushInterface.ACTION_REGISTRATION_ID.equals(intent.getAction())) {
@@ -69,9 +77,11 @@ public class TalkReceiver extends BroadcastReceiver{
 	
 	//send msg to TalkActivity
 	private void processCustomMessage(Context context, Bundle bundle) {
-		if (TalkActivity.isForeground) {
-			String message = bundle.getString(JPushInterface.EXTRA_MESSAGE);
-			String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);
+		String message = bundle.getString(JPushInterface.EXTRA_MESSAGE);
+		String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);
+		String fid = bundle.getString("fid");
+		if (TalkActivity.isForeground && Integer.parseInt(fid) != TalkActivity.fid) {
+			Log.d(TAG, "TalkActivity is foreground");
 			Intent msgIntent = new Intent(TalkActivity.MESSAGE_RECEIVED_ACTION);
 			msgIntent.putExtra(TalkActivity.KEY_MESSAGE, message);
 			if (!StringUtils.isEmpty(extras)) {
@@ -81,11 +91,30 @@ public class TalkReceiver extends BroadcastReceiver{
 						msgIntent.putExtra(TalkActivity.KEY_EXTRAS, extras);
 					}
 				} catch (JSONException e) {
-
+					e.printStackTrace();
 				}
-
 			}
 			context.sendBroadcast(msgIntent);
+			return;
 		}
+		String tikerText = "有信息";
+		String title = "新消息";
+		String content = message;
+		NotificationCompat.Builder mBuilder =
+			    new NotificationCompat.Builder(mContext)
+			    .setSmallIcon(R.drawable.ic_launcher)
+			    .setContentTitle(title)
+			    .setContentText(content);
+		Intent intent = new Intent(mContext, TalkActivity.class);
+		intent.putExtra("notification", true);
+		intent.putExtra("friendId", fid);
+		intent.putExtra("content", message);
+		PendingIntent pIntent = PendingIntent.getActivity(mContext,0,intent,  PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(pIntent);
+		NotificationManager mNotifyMgr = 
+		        (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+		Notification notification = mBuilder.build();
+		notification.flags = Notification.FLAG_AUTO_CANCEL;
+		mNotifyMgr.notify(10, notification);
 	}
 }
