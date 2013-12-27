@@ -73,7 +73,7 @@ public class ChatAdapter extends BaseAdapter{
 				public void onClick(View arg0) {
 					Intent intent = new Intent(mContext,UserInfoActivity.class);
 					intent.putExtra("uid", mChatList.get(pos).getUid());
-					mContext.startActivity(intent);
+					//mContext.startActivity(intent);
 				}
 				
 			});

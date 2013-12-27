@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -98,7 +99,8 @@ public class LoginActivity extends Activity {
 	}
 	
 	private void resetAliasAndTags() {
-		JPushInterface.setAliasAndTags(this, ""+ Config.uid, null);
+		JPushInterface.setAliasAndTags(this, ""+Config.uid, null);
+		Toast.makeText(this, " alias is "+ ""+Config.uid ,Toast.LENGTH_SHORT ).show();
 	}
 	private Handler handler=new Handler(){  
         public void handleMessage(Message msg){  
@@ -107,6 +109,10 @@ public class LoginActivity extends Activity {
             case 1:  
             	Toast.makeText(LoginActivity.this, "µÇÂ¼³É¹¦ -- id is " + Config.uid , Toast.LENGTH_SHORT).show();
             	resetAliasAndTags();
+            	SharedPreferences  cookie = LoginActivity.this.getSharedPreferences("user_cookie", 0);
+				SharedPreferences.Editor editor = cookie.edit();
+				editor.putInt("uid", Config.uid);
+				editor.commit();
             	startActivity(new Intent(LoginActivity.this, IndexInf.class));
         		finish();
                 break;  

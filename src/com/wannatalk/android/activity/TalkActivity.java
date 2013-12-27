@@ -12,6 +12,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -46,6 +47,7 @@ public class TalkActivity extends Activity{
 	private Handler mHandler = null;
 	private DatabaseService ds = new DatabaseService(this);
 	boolean isNotify = false;
+	private int uid = 0;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,12 +58,15 @@ public class TalkActivity extends Activity{
 		isForeground = true;
 		Intent intent = this.getIntent();
 		fid = intent.getExtras().getInt("friendId");
+		Toast.makeText(this, "fid is " + fid, Toast.LENGTH_SHORT).show();
 		isNotify = intent.getExtras().getBoolean("notification", false);
 		if(isNotify){
 			mesg = intent.getExtras().getString("content"); 
 		}
 		initView();
 		init();
+		SharedPreferences  cookie = getSharedPreferences("user_cookie", 0);
+		uid = cookie.getInt("uid", 0);
 		registerMessageReceiver();
 	}
 	
@@ -221,12 +226,13 @@ public class TalkActivity extends Activity{
 		Map<String,String> params = new HashMap<String,String>();
 		params.put("message", mesg);
 		params.put("friend", target);
-		params.put("uid", ""+Config.uid);
+		params.put("uid", ""+ uid);
+		/*
 		if(ds.insertMessage(new MessageModle(mesg, StringUtils.getCurTime(),Config.uid,Config.uid ))) {
 			Log.d(TAG, "insert message ok");
 		}else {
 			Log.d(TAG, "insert message failed");
-		}
+		}*/
 		try {
 			HttpHelper.post(Constants.PUSH_MESG, params);
 		} catch (Exception e) {

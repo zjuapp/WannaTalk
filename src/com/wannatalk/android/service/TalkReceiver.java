@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 import cn.jpush.android.api.JPushInterface;
 
 import com.wannatalk.android.R;
@@ -37,7 +38,12 @@ public class TalkReceiver extends BroadcastReceiver{
           //send the UnRegistration Id to your server...
         } else if (JPushInterface.ACTION_MESSAGE_RECEIVED.equals(intent.getAction())) {
         	Log.d(TAG, "接收到推送下来的自定义消息: " + bundle.getString(JPushInterface.EXTRA_MESSAGE));
-        	processCustomMessage(context, bundle);
+        	try {
+				processCustomMessage(context, bundle);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         
         } else if (JPushInterface.ACTION_NOTIFICATION_RECEIVED.equals(intent.getAction())) {
             Log.d(TAG, "接收到推送下来的通知");
@@ -76,11 +82,14 @@ public class TalkReceiver extends BroadcastReceiver{
 	}
 	
 	//send msg to TalkActivity
-	private void processCustomMessage(Context context, Bundle bundle) {
+	private void processCustomMessage(Context context, Bundle bundle) throws JSONException {
 		String message = bundle.getString(JPushInterface.EXTRA_MESSAGE);
 		String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);
-		String fid = bundle.getString("fid");
-		if (TalkActivity.isForeground && Integer.parseInt(fid) != TalkActivity.fid) {
+		Toast.makeText(context, extras, Toast.LENGTH_SHORT).show();
+		JSONObject json = new JSONObject(extras);
+		String fid = json.optString("fid");
+		Toast.makeText(context, "fid is " + fid, Toast.LENGTH_SHORT).show();
+		if (TalkActivity.isForeground && Integer.parseInt(fid) == TalkActivity.fid) {
 			Log.d(TAG, "TalkActivity is foreground");
 			Intent msgIntent = new Intent(TalkActivity.MESSAGE_RECEIVED_ACTION);
 			msgIntent.putExtra(TalkActivity.KEY_MESSAGE, message);
@@ -107,7 +116,7 @@ public class TalkReceiver extends BroadcastReceiver{
 			    .setContentText(content);
 		Intent intent = new Intent(mContext, TalkActivity.class);
 		intent.putExtra("notification", true);
-		intent.putExtra("friendId", fid);
+		intent.putExtra("friendId", Integer.parseInt(fid));
 		intent.putExtra("content", message);
 		PendingIntent pIntent = PendingIntent.getActivity(mContext,0,intent,  PendingIntent.FLAG_UPDATE_CURRENT);
 		mBuilder.setContentIntent(pIntent);

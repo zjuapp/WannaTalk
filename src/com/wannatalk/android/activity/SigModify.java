@@ -147,13 +147,11 @@ public class SigModify extends Activity implements OnClickListener, OnRatingBarC
            switch(msg.what) {  
            case 1:  
            	Toast.makeText(SigModify.this, "同步信息成功", Toast.LENGTH_SHORT).show();
-       		startActivity(new Intent(SigModify.this, IndexInf.class));
-			finish();
+           	SigModify.this.finish();
                break;  
            case 0:
    			Toast.makeText(SigModify.this, "同步信息失败", Toast.LENGTH_SHORT).show();
-   			startActivity(new Intent(SigModify.this, IndexInf.class));
-   			finish();
+   			SigModify.this.finish();
            }  
            
        }  

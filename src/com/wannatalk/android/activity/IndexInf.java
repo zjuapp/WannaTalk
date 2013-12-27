@@ -103,18 +103,18 @@ public class IndexInf extends Activity{
 	public static float mood_rating;
 	public static int moodid;
 	public static String sig;
-	
+	private static final int[] SCALES = {20, 50, 100, 200, 500, 1000, 2000,  
+         5000, 10000, 20000, 25000, 50000, 100000, 200000, 500000, 1000000,  
+         2000000 };
 	private int dis(GeoPoint a, GeoPoint b){
 		return (int)Math.sqrt(((long)(a.getLatitudeE6() - b.getLatitudeE6())) * (a.getLatitudeE6() - b.getLatitudeE6()) + 
 				((long)(a.getLongitudeE6() - b.getLongitudeE6())) * (a.getLongitudeE6() - b.getLongitudeE6()));
 	}
 	public Graphic drawCircle(GeoPoint p) {
-			//构建圆*/
 			int dis = dis(p, mapView.getMapCenter());
-	  		Geometry circleGeometry = new Geometry();
-	  		//设置圆中心点坐标和半径
-	  		circleGeometry.setCircle(p, dis / 10);
-	  		//设置样式
+			Geometry circleGeometry = new Geometry();
+	  		circleGeometry.setCircle(mapView.getMapCenter(), dis / 10);
+			Toast.makeText(IndexInf.this, Float.toString(mapView.getZoomLevel()), Toast.LENGTH_LONG).show();
 	  		Symbol circleSymbol = new Symbol();
 	 		Symbol.Color circleColor = circleSymbol.new Color();
 	 		circleColor.red = 0;
@@ -348,7 +348,9 @@ public class IndexInf extends Activity{
 			    			NameValuePair []user = {
 			    					new NameValuePair("lat", "0"),//Integer.toString(point.getLatitudeE6())), 
 			    					new NameValuePair("lon", "0"),//Integer.toString(point.getLongitudeE6())),
-			    					new NameValuePair("r", "1")//Integer.toString(dis(mapView.getMapCenter(), point)))
+			    					new NameValuePair("r", "1"),//Integer.toString(dis(mapView.getMapCenter(), point)))
+			    					new NameValuePair("motion", Integer.toString(Config.motion)),
+			    					new NameValuePair("motionlevel", Integer.toString(Config.motionlevel))
 			    			};	
 			    			method.setRequestBody(user);
 			    			try{
@@ -363,6 +365,8 @@ public class IndexInf extends Activity{
 			    				dlg.dismiss();
 			    				intent.putExtras(data);
 			    				startActivity(intent);
+			    				mapView.getOverlays().clear();
+								mapView.refresh();
 			    			} 
 			    			catch(Exception e){
 			    				Log.v("SearchMap", "begin call search error", e);
@@ -439,7 +443,7 @@ public class IndexInf extends Activity{
 	};
 	protected void onResume(){
 		  super.onResume();
-		  rt_mood.setRating(Config.motionlevel * 2);
+		  rt_mood.setRating((float) (Config.motionlevel * 1.0 / 2));
 		  info_mood.setText(Constants.ModState[Config.motion]);
 		  info_sig.setText(Config.happen);
 	}
@@ -467,6 +471,23 @@ public class IndexInf extends Activity{
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch(featureId) {
 			case 0:
+				new Thread(){
+					@Override
+					public void run(){
+						PostMethod method = new PostMethod("/api/updatestate");
+		    			NameValuePair []user = {
+		    					new NameValuePair("id", Integer.toString(Config.uid)),//Integer.toString(point.getLatitudeE6())), 
+		    					new NameValuePair("state", Integer.toString(0))
+		    			};	
+		    			method.setRequestBody(user);
+		    			try{
+		    				Config.client.executeMethod(method);
+		    			}
+		    			catch(Exception e){
+		    				
+		    			}
+					}
+				}.start();
 				this.finish();
 				
 				break;
